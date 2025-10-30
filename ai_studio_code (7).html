@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Nickname Generator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Changed to flex-start for better view on long lists */
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 750px;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.2em;
+            color: #1a73e8;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #555;
+            margin-bottom: 30px;
+        }
+
+        .input-container {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        #nameInput {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        #nameInput:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+
+        #nicknames-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+            max-height: 500px; /* Increased height */
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            text-align: left;
+        }
+
+        .nickname-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            transition: background-color 0.3s;
+        }
+        
+        .nickname-item:last-child {
+            border-bottom: none;
+        }
+
+        .nickname-item:hover {
+            background-color: #f9f9f9;
+        }
+
+        .nickname-text {
+            font-size: 18px;
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            padding-right: 15px;
+        }
+
+        .copy-btn {
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            transition: background-color 0.3s, transform 0.2s;
+            flex-shrink: 0; /* Prevents button from shrinking */
+        }
+
+        .copy-btn:hover {
+            background-color: #155ab6;
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .footer-text {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Ultimate Nickname Generator</h1>
+        <p>Enter your name to generate hundreds of stylish and unique nicknames instantly!</p>
+        
+        <div class="input-container">
+            <input type="text" id="nameInput" placeholder="Type your name here..." autocomplete="off">
+        </div>
+
+        <ul id="nicknames-list">
+            <!-- Nicknames will be generated here -->
+        </ul>
+        
+        <p class="footer-text">Find your perfect style and copy with one click.</p>
+    </div>
+
+    <script>
+        const nameInput = document.getElementById('nameInput');
+        const nicknamesList = document.getElementById('nicknames-list');
+
+        // --- Extensive Font and Character Maps ---
+        const fontMaps = {
+            'upsideDown': { 'a': 'ɐ', 'b': 'q', 'c': 'ɔ', 'd': 'p', 'e': 'ǝ', 'f': 'ɟ', 'g': 'ƃ', 'h': 'ɥ', 'i': 'ı', 'j': 'ɾ', 'k': 'ʞ', 'l': 'ן', 'm': 'ɯ', 'n': 'u', 'o': 'o', 'p': 'd', 'q': 'b', 'r': 'ɹ', 's': 's', 't': 'ʇ', 'u': 'n', 'v': 'ʌ', 'w': 'ʍ', 'x': 'x', 'y': 'ʎ', 'z': 'z' },
+            'circled': { 'a': 'ⓐ', 'b': 'ⓑ', 'c': 'ⓒ', 'd': 'ⓓ', 'e': 'ⓔ', 'f': 'ⓕ', 'g': 'ⓖ', 'h': 'ⓗ', 'i': 'ⓘ', 'j': 'ⓙ', 'k': 'ⓚ', 'l': 'ⓛ', 'm': 'ⓜ', 'n': 'ⓝ', 'o': 'ⓞ', 'p': 'ⓟ', 'q': 'ⓠ', 'r': 'ⓡ', 's': 'ⓢ', 't': 'ⓣ', 'u': 'ⓤ', 'v': 'ⓥ', 'w': 'ⓦ', 'x': 'ⓧ', 'y': 'ⓨ', 'z': 'ⓩ' },
+            'negativeCircled': { 'a': '🅐', 'b': '🅑', 'c': '🅒', 'd': '🅓', 'e': '🅔', 'f': '🅕', 'g': '🅖', 'h': '🅗', 'i': '🅘', 'j': '🅙', 'k': '🅚', 'l': '🅛', 'm': '🅜', 'n': '🅝', 'o': '🅞', 'p': '🅟', 'q': '🅠', 'r': '🅡', 's': '🅢', 't': '🅣', 'u': '🅤', 'v': '🅥', 'w': '🅦', 'x': '🅧', 'y': '🅨', 'z': '🅩' },
+            'square': { 'a': '🄰', 'b': '🄱', 'c': '🄲', 'd': '🄳', 'e': '🄴', 'f': '🄵', 'g': '🄶', 'h': '🄷', 'i': '🄸', 'j': '🄹', 'k': '🄺', 'l': '🄻', 'm': '🄼', 'n': '🄽', 'o': '🄾', 'p': '🄿', 'q': '🅀', 'r': '🅁', 's': '🅂', 't': '🅃', 'u': '🅄', 'v': '🅅', 'w': '🅆', 'x': '🅇', 'y': '🅈', 'z': '🅉' },
+            'negativeSquare': { 'a': '🅰', 'b': '🅱', 'c': '🅲', 'd': '🅳', 'e': '🅴', 'f': '🅵', 'g': '🅶', 'h': '🅷', 'i': '🅸', 'j': '🅹', 'k': '🅺', 'l': '🅻', 'm': '🅼', 'n': '🅽', 'o': '🅾', 'p': '🅿', 'q': '🆀', 'r': '🆁', 's': '🆂', 't': '🆃', 'u': '🆄', 'v': '🆅', 'w': '🆆', 'x': '🆇', 'y': '🆈', 'z': '🆉' },
+            'cursive': { 'a': '𝒶', 'b': '𝒷', 'c': '𝒸', 'd': '𝒹', 'e': '𝑒', 'f': '𝒻', 'g': '𝑔', 'h': '𝒽', 'i': '𝒾', 'j': '𝒿', 'k': '𝓀', 'l': '𝓁', 'm': '𝓂', 'n': '𝓃', 'o': '𝑜', 'p': '𝓅', 'q': '𝓆', 'r': '𝓇', 's': '𝓈', 't': '𝓉', 'u': '𝓊', 'v': '𝓋', 'w': '𝓌', 'x': '𝓍', 'y': '𝓎', 'z': '𝓏' },
+            'cursiveBold': { 'a': '𝓪', 'b': '𝓫', 'c': '𝓬', 'd': '𝓭', 'e': '𝓮', 'f': '𝓯', 'g': '𝓰', 'h': '𝓱', 'i': '𝓲', 'j': '𝓳', 'k': '𝓴', 'l': '𝓵', 'm': '𝓶', 'n': '𝓷', 'o': '𝓸', 'p': '𝓹', 'q': '𝓺', 'r': '𝓻', 's': '𝓼', 't': '𝓽', 'u': '𝓾', 'v': '𝓿', 'w': '𝔀', 'x': '𝔁', 'y': '𝔂', 'z': '𝔃' },
+            'monospace': { 'a': '𝚊', 'b': '𝚋', 'c': '𝚌', 'd': '𝚍', 'e': '𝚎', 'f': '𝚏', 'g': '𝚐', 'h': '𝚑', 'i': '𝚒', 'j': '𝚓', 'k': '𝚔', 'l': '𝚕', 'm': '𝚖', 'n': '𝚗', 'o': '𝚘', 'p': '𝚙', 'q': '𝚚', 'r': '𝚛', 's': '𝚜', 't': '𝚝', 'u': '𝚞', 'v': '𝚟', 'w': '𝚠', 'x': '𝚡', 'y': '𝚢', 'z': '𝚣' },
+            'bold': { 'a': '𝐚', 'b': '𝐛', 'c': '𝐜', 'd': '𝐝', 'e': '𝐞', 'f': '𝐟', 'g': '𝐠', 'h': '𝐡', 'i': '𝐢', 'j': '𝐣', 'k': '𝐤', 'l': '𝐥', 'm': '𝐦', 'n': '𝐧', 'o': '𝐨', 'p': '𝐩', 'q': '𝐪', 'r': '𝐫', 's': '𝐬', 't': '𝐭', 'u': '𝐮', 'v': '𝐯', 'w': '𝐰', 'x': '𝐱', 'y': '𝐲', 'z': '𝐳' },
+            'italic': { 'a': '𝘢', 'b': '𝘣', 'c': '𝘤', 'd': '𝘥', 'e': '𝘦', 'f': '𝘧', 'g': '𝘨', 'h': '𝘩', 'i': '𝘪', 'j': '𝘫', 'k': '𝘬', 'l': '𝘭', 'm': '𝘮', 'n': '𝘯', 'o': '𝘰', 'p': '𝘱', 'q': '𝘲', 'r': '𝘳', 's': '𝘴', 't': '𝘵', 'u': '𝘶', 'v': '𝘷', 'w': '𝘸', 'x': '𝘹', 'y': '𝘺', 'z': '𝘻' },
+            'doubleStruck': { 'a': '𝕒', 'b': '𝕓', 'c': '𝕔', 'd': '𝕕', 'e': '𝕖', 'f': '𝕗', 'g': '𝕘', 'h': '𝕙', 'i': '𝕚', 'j': '𝕛', 'k': '𝕜', 'l': '𝕝', 'm': '𝕞', 'n': '𝕟', 'o': '𝕠', 'p': '𝕡', 'q': '𝕢', 'r': '𝕣', 's': '𝕤', 't': '𝕥', 'u': '𝕦', 'v': '𝕧', 'w': '𝕨', 'x': '𝕩', 'y': '𝕪', 'z': '𝕫' },
+            'fraktur': { 'a': '𝔞', 'b': '𝔟', 'c': '𝔠', 'd': '𝔡', 'e': '𝔢', 'f': '𝔣', 'g': '𝔤', 'h': '𝔥', 'i': '𝔦', 'j': '𝔧', 'k': '𝔨', 'l': '𝔩', 'm': '𝔪', 'n': '𝔫', 'o': '𝔬', 'p': '𝔭', 'q': '𝔮', 'r': '𝔯', 's': '𝔰', 't': '𝔱', 'u': '𝔲', 'v': '𝔳', 'w': '𝔴', 'x': '𝔵', 'y': '𝔶', 'z': '𝔷' },
+            'frakturBold': { 'a': '𝖆', 'b': '𝖇', 'c': '𝖈', 'd': '𝖉', 'e': '𝖊', 'f': '𝖋', 'g': '𝖌', 'h': '𝖍', 'i': '𝖎', 'j': '𝖏', 'k': '𝖐', 'l': '𝖑', 'm': '𝖒', 'n': '𝖓', 'o': '𝖔', 'p': '𝖕', 'q': '𝖖', 'r': '𝖗', 's': '𝖘', 't': '𝖙', 'u': '𝖚', 'v': '𝖛', 'w': '𝖜', 'x': '𝖝', 'y': '𝖞', 'z': '𝖟' }
+        };
+
+        // --- Helper function to apply a font style ---
+        function applyStyle(text, styleMap) {
+            let result = '';
+            for (const char of text) {
+                const lowerChar = char.toLowerCase();
+                if (styleMap[lowerChar]) {
+                    result += styleMap[lowerChar];
+                } else {
+                    result += char;
+                }
+            }
+            return result;
+        }
+
+        function debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+
+        // --- Main generation function ---
+        function generateNicknames() {
+            const name = nameInput.value.trim();
+            nicknamesList.innerHTML = '';
+
+            if (name.length === 0) {
+                return;
+            }
+
+            const generated = new Set();
+
+            // --- Section 1: Basic Decorations ---
+            const decorations = [
+                ['★彡', '彡★'], ['꧁', '꧂'], ['༺', '༻'], ['『', '』'], ['【', '】'], ['✧', '✧'], ['⫷', '⫸'],
+                ['-ˋˏ ', ' ˎˊ-'], ['█▬█ █ ▀█▀', ''], ['', ' ▀█▀ █ █▬█'], ['[', ']'], ['(', ')'], ['༄', '࿐'],
+                ['`•.¸¸.•´´¯`••._.•', '•._.••`¯´´•.¸¸.•`'], ['▄︻デ', '══━一'], ['¸,ø¤º°`°º¤ø,¸', '¸,ø¤º°`°º¤ø,¸']
+            ];
+            decorations.forEach(d => generated.add(`${d[0]}${name}${d[1]}`));
+
+            // --- Section 2: Font Styles ---
+            for (const styleName in fontMaps) {
+                if (styleName === 'upsideDown') {
+                    generated.add(applyStyle(name, fontMaps[styleName]).split('').reverse().join(''));
+                } else {
+                    generated.add(applyStyle(name, fontMaps[styleName]));
+                }
+            }
+
+            // --- Section 3: Character Replacements & Patterns ---
+            generated.add(name.replace(/[aA]/g, '4').replace(/[eE]/g, '3').replace(/[iI]/g, '1').replace(/[oO]/g, '0').replace(/[sS]/g, '5'));
+            generated.add(name.replace(/[aA]/g, '@').replace(/[sS]/g, '$'));
+            generated.add(name.split('').map((c, i) => i % 2 === 0 ? c.toLowerCase() : c.toUpperCase()).join(''));
+            generated.add(name.split('').map((c, i) => i % 2 !== 0 ? c.toLowerCase() : c.toUpperCase()).join(''));
+            generated.add(name.split('').join(' '));
+            generated.add(name.split('').join('-'));
+            generated.add(name.split('').join('•'));
+            generated.add(name.split('').map(c => c + ' ').join(''));
+
+            // --- Section 4: Prefixes and Suffixes ---
+            const prefixes = ['The', 'King', 'Queen', 'Shadow', 'Dark', 'Pro', 'Agent', 'Mr', 'Dr'];
+            const suffixes = ['YT', 'Pro', 'Gamer', 'Killer', 'Slayer', 'Official', '™', '®'];
+            prefixes.forEach(p => generated.add(`${p}${name}`));
+            suffixes.forEach(s => generated.add(`${name}${s}`));
+            generated.add(`xX_${name}_Xx`);
+
+            // --- Section 5: Complex Combinations ---
+            // Decorated font styles
+            generated.add(`꧁${applyStyle(name, fontMaps.fraktur)}꧂`);
+            generated.add(`༺${applyStyle(name, fontMaps.cursive)}༻`);
+            generated.add(`▄︻デ${applyStyle(name, fontMaps.bold)}══━一`);
+            generated.add(`★彡${applyStyle(name, fontMaps.doubleStruck)}彡★`);
+
+            // --- Render the list ---
+            generated.forEach(nickname => {
+                if (nickname.length === 0) return;
+
+                const li = document.createElement('li');
+                li.className = 'nickname-item';
+
+                const span = document.createElement('span');
+                span.className = 'nickname-text';
+                span.textContent = nickname;
+
+                const button = document.createElement('button');
+                button.className = 'copy-btn';
+                button.textContent = 'Copy';
+
+                button.onclick = () => {
+                    navigator.clipboard.writeText(nickname).then(() => {
+                        // Reset all buttons first
+                        document.querySelectorAll('.copy-btn').forEach(btn => btn.textContent = 'Copy');
+                        // Then set this one to "Copied!"
+                        button.textContent = 'Copied!';
+                        setTimeout(() => {
+                            if (button.textContent === 'Copied!') {
+                                button.textContent = 'Copy';
+                            }
+                        }, 1500);
+                    }).catch(err => {
+                        console.error('Failed to copy: ', err);
+                        alert('Could not copy text.');
+                    });
+                };
+
+                li.appendChild(span);
+                li.appendChild(button);
+                nicknamesList.appendChild(li);
+            });
+        }
+        
+        // Use debounce to avoid generating on every single keystroke, improving performance
+        const debouncedGenerate = debounce(generateNicknames, 250);
+        nameInput.addEventListener('input', debouncedGenerate);
+
+        // Initial generation for placeholder or pre-filled value
+        generateNicknames();
+    </script>
+</body>
+</html>```
+
+### নতুন কী কী যোগ করা হলো:
+
+1.  **অনেক বেশি ফন্ট (More Fonts):**
+    *   `Cursive Bold` (মোটা টানা হাতের লেখা)
+    *   `Bold` (মোটা)
+    *   `Italic` (বাঁকা)
+    *   `Double Struck` (ডাবল লাইন)
+    *   `Fraktur` (পুরানো দিনের স্টাইল)
+    *   `Fraktur Bold` (মোটা পুরানো দিনের স্টাইল)
+    *   `Negative Circled` (কালো বৃত্তের মধ্যে অক্ষর)
+    *   `Negative Square` (কালো বক্সের মধ্যে অক্ষর)
+
+2.  **অনেক বেশি ডেকোরেশন (More Decorations):**
+    *   নামের আগে এবং পরে বিভিন্ন ধরণের শৈল্পিক প্রতীক যোগ করা হয়েছে, যেমন: `༄নাম࿐`, `▄︻デনাম══━一` ইত্যাদি।
+
+3.  **বিভিন্ন কম্বিনেশন (Complex Combinations):**
+    *   শুধু নাম নয়, স্টাইলিশ ফন্টের নামগুলোকেও বিভিন্ন ডেকোরেশনের ভেতরে যুক্ত করা হয়েছে। যেমন: `꧁𝔫𝔞𝔪𝔢꧂`, `༺𝓃𝒶𝓂𝑒༻`।
+
+4.  **Prefix এবং Suffix:**
+    *   নামের আগে `King`, `Shadow`, `Pro` এবং নামের পরে `YT`, `Gamer`, `Slayer` ইত্যাদি শব্দ যোগ করে নতুন নাম তৈরি করা হয়েছে।
+
+5.  **Performance Improvement:**
+    *   `debounce` নামে একটি ফাংশন যোগ করা হয়েছে। এর ফলে ব্যবহারকারী যখন দ্রুত টাইপ করবে, তখন বার বার জেনারেট না হয়ে, টাইপ শেষ হওয়ার একটু পরে সব নাম একসাথে জেনারেট হবে। এটি ওয়েবসাইটকে আরও দ্রুত এবং মসৃণ করে তুলবে।
+
+6.  **UI/UX Improvement:**
+    *   কপি বাটনে ক্লিক করলে এখন লেখা "Copied!" দেখাবে এবং কিছুক্ষণের মধ্যে আবার আগের মতো "Copy" হয়ে যাবে। এটি ব্যবহারকারীকে বুঝতে সাহায্য করবে যে টেক্সট সফলভাবে কপি হয়েছে।
+    *   তালিকাটি প্রদর্শনের জন্য জায়গা কিছুটা বড় করা হয়েছে (`max-height: 500px`)।
+
+এখন এই ওয়েবসাইটটি আপনার ব্যবহারকারীদের নামের জন্য শত শত অনন্য এবং আকর্ষণীয় বিকল্প তৈরি করতে পারবে।
